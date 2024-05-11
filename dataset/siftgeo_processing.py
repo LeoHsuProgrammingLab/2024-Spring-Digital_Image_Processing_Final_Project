@@ -26,6 +26,23 @@ def siftgeo_read(filename, maxdes=None):
     
     return v, meta
 
+def load_key_desc_from_file(filename):
+    keypoints = []
+    descriptors = []
+    
+    with open(filename, 'r') as file:
+        lines = file.readlines()[2:]  
+        
+    for line in lines:
+        numbers = list(map(float, line.split()))
+        keypoints.append(numbers[0:5])
+        descriptors.append(numbers[5:])
+    
+    keypoints = np.array(keypoints)
+    descriptors = np.array(descriptors)
+    
+    return descriptors, keypoints
+
 def read_all_siftgeo(directory, maxdes=None):
     results = {}
     for filename in tqdm(os.listdir(directory)):
@@ -35,13 +52,40 @@ def read_all_siftgeo(directory, maxdes=None):
             results[filename] = (descriptors, metadata)
     return results
 
+def read_all_sift(directory, maxdes=None):
+    results = {}
+    for filename in tqdm(os.listdir(directory)):
+        if filename.endswith(".sift"):
+            filepath = os.path.join(directory, filename)
+            descriptors, metadata = load_key_desc_from_file(filepath)
+            results[filename] = (descriptors, metadata)
+    return results
+
 if __name__ == '__main__':
-    directory_path = '/home/leohsu-cs/siftgeo'
-    all_files_data = read_all_siftgeo(directory_path, maxdes=5000)
+    directory_path1 = '/home/leohsu-cs/siftgeo'
+    all_files_data = read_all_siftgeo(directory_path1, maxdes=5000)
+
+    directory_path2 = '/home/leohsu-cs/keypoints'
+    all_files_data2 = read_all_sift(directory_path2)
     
-    for filename, data in tqdm(all_files_data.items()):
-        print(f"File: {filename}")
-        print("Descriptors:")
-        print(data[0])
-        print("Metadata:")
-        print(data[1])
+    # for filename, data in tqdm(all_files_data.items()):
+    #     print(f"File: {filename}")
+    #     print("Descriptors:")
+    #     print(data[0])
+    #     print(data[0].shape)
+    #     print("Metadata:")
+    #     print(data[1])
+    #     print(data[1].shape)
+
+    length = len(all_files_data)
+    keys1 = sorted(list(all_files_data.keys()))
+    keys2 = sorted(list(all_files_data2.keys()))
+
+    for i in range(length):
+        filename1 = keys1[i][:5]
+        filename2 = keys2[i][:5]
+        print(filename1, filename2)
+        
+        data1 = all_files_data[keys1[i]]
+        data2 = all_files_data2[keys2[i]]
+        print(f"File: {filename1}", data1[0].shape, data2[0].shape)
