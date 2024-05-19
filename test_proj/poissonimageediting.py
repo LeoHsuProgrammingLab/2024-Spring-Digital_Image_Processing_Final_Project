@@ -225,18 +225,34 @@ def lap_at_index_mixing(source, target, index, contuor, ngb_flag):
   ## current location
   i, j = index
 
+  # Check if the indices are within valid range
+  height, width = source.shape
+  if not (0 <= i < height and 0 <= j < width):
+      raise IndexError(f"Index out of range: i={i}, j={j}, source.shape={source.shape}")
 
-  ## gradient for source image
-  grad_right_src = float(ngb_flag[0]==True) * (source[i, j] - source[i, j+1])
-  grad_left_src = float(ngb_flag[1]==True) * (source[i, j] - source[i, j-1])
-  grad_bottom_src = float(ngb_flag[2]==True) * (source[i, j] - source[i+1, j])
-  grad_up_src = float(ngb_flag[3]==True) * (source[i, j] - source[i-1, j])
+  # Initialize gradients
+  grad_right_src, grad_left_src, grad_bottom_src, grad_up_src = 0, 0, 0, 0
+  grad_right_tar, grad_left_tar, grad_bottom_tar, grad_up_tar = 0, 0, 0, 0
 
-  ## gradient for target image
-  grad_right_tar = float(ngb_flag[0]==True) * (target[i, j] - target[i, j+1])
-  grad_left_tar = float(ngb_flag[1]==True) * (target[i, j] - target[i, j-1])
-  grad_bottom_tar = float(ngb_flag[2]==True) * (target[i, j] - target[i+1, j])
-  grad_up_tar = float(ngb_flag[3]==True) * (target[i, j] - target[i-1, j])
+  # Compute gradients for source image with boundary checks
+  if ngb_flag[0] and j + 1 < width:
+      grad_right_src = source[i, j] - source[i, j+1]
+  if ngb_flag[1] and j - 1 >= 0:
+      grad_left_src = source[i, j] - source[i, j-1]
+  if ngb_flag[2] and i + 1 < height:
+      grad_bottom_src = source[i, j] - source[i+1, j]
+  if ngb_flag[3] and i - 1 >= 0:
+      grad_up_src = source[i, j] - source[i-1, j]
+
+  # Compute gradients for target image with boundary checks
+  if ngb_flag[0] and j + 1 < width:
+      grad_right_tar = target[i, j] - target[i, j+1]
+  if ngb_flag[1] and j - 1 >= 0:
+      grad_left_tar = target[i, j] - target[i, j-1]
+  if ngb_flag[2] and i + 1 < height:
+      grad_bottom_tar = target[i, j] - target[i+1, j]
+  if ngb_flag[3] and i - 1 >= 0:
+      grad_up_tar = target[i, j] - target[i-1, j]
 
 
   val = [grad_right_src, grad_left_src, grad_bottom_src, grad_up_src]
@@ -561,10 +577,14 @@ def constrain(target, index, contuor, ngb_flag):
   ## current location
   i, j = index
 
+  height, width = target.shape
 
   ## In order to use "Dirichlet boundary condition",
   ## if on boundry, add in target intensity --> set constraint grad(source) = target at boundary
   if(contuor[i][j]==1):
+    if (i == 0 or i == height - 1 or j == 0 or j == width - 1):
+      val = target[i, j]
+      return val
     val = (float(ngb_flag[0]==False) * target[i, j+1]
            + float(ngb_flag[1]==False) * target[i, j-1]
            + float(ngb_flag[2]==False) * target[i+1, j]
@@ -594,7 +614,7 @@ def progress_bar(n, N):
   current = "#" * int(percent//step)
   remain = " " * int(100/step-int(percent//step))
   bar = "|{}{}|".format(current, remain)
-  print("\r{}:{:3.0f}[%]".format(bar, percent), end="", flush=True)
+  # print("\r{}:{:3.0f}[%]".format(bar, percent), end="", flush=True)
   
 
 
@@ -623,7 +643,7 @@ def poisson_blend(src, mask, tar, method, output_dir):
   ### get omega, neigbourhoods flag
   omega, ngb_flag, yx_omega = indicies(mask)
 
-
+  print("omega shape: ", omega.shape)
 
 
   ### fill A
@@ -679,7 +699,10 @@ def poisson_blend(src, mask, tar, method, output_dir):
   for index in range(omega.shape[0]):
 
     i, j = omega[index]
-  
+    if i < 0 or i >= blended.shape[0] or j < 0 or j >= blended.shape[1]:
+      print("index out of range ", index, i, j)
+      continue
+
     ## normal
     blended[i][j][0] = np.clip(x_b[index], 0.0, 1.0)
     blended[i][j][1] = np.clip(x_g[index], 0.0, 1.0)
@@ -689,7 +712,6 @@ def poisson_blend(src, mask, tar, method, output_dir):
     overlapped[i][j][0] = src[i][j][0]
     overlapped[i][j][1] = src[i][j][1]
     overlapped[i][j][2] = src[i][j][2]
-
 
   return (np.array(blended*255, dtype=np.uint8), 
           np.array(overlapped*255, dtype=np.uint8))

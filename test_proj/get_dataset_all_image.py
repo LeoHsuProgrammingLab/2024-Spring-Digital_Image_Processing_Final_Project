@@ -3,18 +3,6 @@ import numpy as np
 import pandas as pd
 import os
 
-# Set up argument parser
-parser = argparse.ArgumentParser()
-parser.add_argument("--descriptors_dir_path", type=str)
-parser.add_argument("--images_dir_path", type=str)
-parser.add_argument("--save_df_path", type=str)
-args = parser.parse_args()
-
-# Get the paths from the arguments
-descriptors_dir = args.descriptors_dir_path
-images_dir = args.images_dir_path
-save_dir = args.save_df_path
-
 def load_data_from_file(filename):
     keypoints = []
     descriptors = []
@@ -74,66 +62,83 @@ def get_ellipse_properties(keypoints):
 
     return coord, s, o, As, eigenvalues_lst, eigenvectors_lst, semi_major_lst, semi_minor_lst, size_lst, angle_lst
 
-# List and sort files in the directories
-descriptors_path_lst = sorted(os.listdir(descriptors_dir))
-images_path_lst = sorted(os.listdir(images_dir))
+def main():
+    # Set up argument parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--descriptors_dir_path", type=str)
+    parser.add_argument("--images_dir_path", type=str)
+    parser.add_argument("--save_df_path", type=str)
+    args = parser.parse_args()
 
-# Initialize lists to store data for all images
-image_names = []
-coordinates = []
-scales = []
-orientations = []
-matrices = []
-eigenvalues = []
-eigenvectors = []
-semi_major_axes = []
-semi_minor_axes = []
-sizes = []
-angles = []
-descriptors_list = []
+    # Get the paths from the arguments
+    descriptors_dir = args.descriptors_dir_path
+    images_dir = args.images_dir_path
+    save_dir = args.save_df_path
 
-# Process all descriptor files
-for i in range(len(descriptors_path_lst)):
-    path = os.path.join(descriptors_dir, descriptors_path_lst[i])
-    keypoints, descriptors = load_data_from_file(path)
-    
-    coord, s, o, A, eigenvalues_lst, eigenvectors_lst, semi_major_lst, semi_minor_lst, size_lst, angle_lst = get_ellipse_properties(keypoints)
-    
-    img_id = images_path_lst[i]
-    
-    A = [array.tolist() for array in A]
-    eigenvalues_lst = [array.tolist() for array in eigenvalues_lst]
-    eigenvectors_lst = [array.tolist() for array in eigenvectors_lst]
-    
-    # Append data to the lists
-    image_names += [img_id] * len(keypoints)
-    coordinates += coord
-    scales += s
-    orientations += o
-    matrices += A
-    eigenvalues += eigenvalues_lst
-    eigenvectors += eigenvectors_lst
-    semi_major_axes += semi_major_lst
-    semi_minor_axes += semi_minor_lst
-    sizes += size_lst
-    angles += angle_lst
-    descriptors_list += descriptors.tolist()
-    
-# Create the DataFrame
-df = pd.DataFrame({
-    'image_name': image_names,
-    'coordinate': coordinates,
-    'scale': scales,
-    'orientation': orientations,
-    'matrix': matrices,
-    'eigenvalues': eigenvalues,
-    'eigenvectors': eigenvectors,
-    'semi_major_axis': semi_major_axes,
-    'semi_minor_axis': semi_minor_axes,
-    'size': sizes,
-    'angle': angles,
-    'descriptor': descriptors_list
-})
+    # List and sort files in the directories
+    descriptors_path_lst = sorted(os.listdir(descriptors_dir))
+    images_path_lst = sorted(os.listdir(images_dir))
 
-# Save the DataFrame to a pickle file
-df.to_pickle(save_dir)
+    # Initialize lists to store data for all images
+    image_names = []
+    coordinates = []
+    scales = []
+    orientations = []
+    matrices = []
+    eigenvalues = []
+    eigenvectors = []
+    semi_major_axes = []
+    semi_minor_axes = []
+    sizes = []
+    angles = []
+    descriptors_list = []
+
+    # Process all descriptor files
+    for i in range(len(descriptors_path_lst)):
+        path = os.path.join(descriptors_dir, descriptors_path_lst[i])
+        keypoints, descriptors = load_data_from_file(path)
+        
+        coord, s, o, A, eigenvalues_lst, eigenvectors_lst, semi_major_lst, semi_minor_lst, size_lst, angle_lst = get_ellipse_properties(keypoints)
+        
+        img_id = images_path_lst[i]
+        
+        A = [array.tolist() for array in A]
+        eigenvalues_lst = [array.tolist() for array in eigenvalues_lst]
+        eigenvectors_lst = [array.tolist() for array in eigenvectors_lst]
+        
+        # Append data to the lists
+        image_names += [img_id] * len(keypoints)
+        coordinates += coord
+        scales += s
+        orientations += o
+        matrices += A
+        eigenvalues += eigenvalues_lst
+        eigenvectors += eigenvectors_lst
+        semi_major_axes += semi_major_lst
+        semi_minor_axes += semi_minor_lst
+        sizes += size_lst
+        angles += angle_lst
+        descriptors_list += descriptors.tolist()
+        
+    # Create the DataFrame
+    df = pd.DataFrame({
+        'image_name': image_names,
+        'coordinate': coordinates,
+        'scale': scales,
+        'orientation': orientations,
+        'matrix': matrices,
+        'eigenvalues': eigenvalues,
+        'eigenvectors': eigenvectors,
+        'semi_major_axis': semi_major_axes,
+        'semi_minor_axis': semi_minor_axes,
+        'size': sizes,
+        'angle': angles,
+        'descriptor': descriptors_list
+    })
+    print(df.shape)
+
+    # Save the DataFrame to a pickle file
+    df.to_pickle(save_dir)
+
+if __name__ == "__main__":
+    main()
