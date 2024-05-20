@@ -1,0 +1,17 @@
+name: dip_proj
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - numpy
+  - pandas
+  - opencv
+  - matplotlib
+  - scipy
+  - pytorch
+  - pyamg
+  - tqdm
+  - scikit-image
+  - cvxopt
+  - pip:
+    - pip
