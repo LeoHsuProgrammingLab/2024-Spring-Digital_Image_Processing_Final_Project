@@ -24,7 +24,7 @@ def process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_
             shutil.move(src_path, dst_path)
 
     # Generate the pickle for the dataset
-    subprocess.run(["python3", "get_dataset.py",
+    subprocess.run(["python3", "get_dataset_all_image.py",
                     "--descriptors_dir_path", dataset_descriptors_dir,
                     "--images_dir_path", dataset_images_dir,
                     "--save_df_path", dataset_pickle_path])
@@ -68,14 +68,15 @@ def process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, datase
     os.makedirs(dataset_descriptors_dir, exist_ok=True)
     for dir in os.listdir(dataset_images_dir):
         if os.path.isdir(os.path.join(dataset_images_dir, dir)):
+            os.makedirs(os.path.join(dataset_descriptors_dir, dir), exist_ok=True)
             for file in os.listdir(os.path.join(dataset_images_dir, dir)):
                 if file.endswith(".hesaff.sift"):
                     src_path = os.path.join(dataset_images_dir, dir, file)
-                    dst_path = os.path.join(dataset_descriptors_dir, file)
+                    dst_path = os.path.join(dataset_descriptors_dir, dir, file)
                     shutil.move(src_path, dst_path)
 
     # Generate the pickle for the dataset
-    subprocess.run(["python3", "get_dataset.py",
+    subprocess.run(["python3", "get_dataset_all_image.py",
                     "--descriptors_dir_path", dataset_descriptors_dir,
                     "--images_dir_path", dataset_images_dir,
                     "--save_df_path", dataset_pickle_path])
@@ -94,29 +95,28 @@ def process_target(target_image_dir, target_descriptor_save_dir, target_pickle_p
             subprocess.run(["./hesaff", target_image_path, "10"])
 
     os.makedirs(target_descriptor_save_dir, exist_ok=True)
-    for file in os.listdir("."):
+    for file in os.listdir(target_image_dir):
         if file.endswith(".hesaff.sift"):
-            descriptor_file = f"{target_image_path}.hesaff.sift"
-            shutil.move(descriptor_file, target_descriptor_save_dir)
+            src = os.path.join(target_image_dir, file)
+            dst = os.path.join(target_descriptor_save_dir, file)
+            print(src, dst)
+            # Move the descriptor file to the target descriptor save directory  
+            shutil.move(src, dst)
 
     # Generate the pickle for the target image
-    subprocess.run(["python3", "get_dataset.py",
+    subprocess.run(["python3", "get_dataset_all_image.py",
                     "--descriptors_dir_path", target_descriptor_save_dir,
                     "--images_dir_path", target_image_dir,
                     "--save_df_path", target_pickle_path])
 
+def exists_dir_in_dir(dir_path):
+    for file in os.listdir(dir_path):
+        if os.path.isdir(os.path.join(dir_path, file)):
+            return True
+    return False
+
 # Example usage
 if __name__ == "__main__":
-    # Set variables
-    dataset = "anime"
-    dataset_images_dir = f"data/{dataset}_images"
-    dataset_descriptors_dir = f"data/{dataset}_desc"
-    dataset_pickle_path = f"data/{dataset}_df.pkl"
-
-    target_image_path = "data/target_image"
-    target_descriptor_save_dir = "data/target_desc"
-    target_pickle_path = "data/target_df.pkl"
-
     # Remove old hesaff executable if it exists
     if os.path.exists("hesaff"):
         os.remove("hesaff")
@@ -130,12 +130,28 @@ if __name__ == "__main__":
     os.chdir("..")
     
     # Rename directories and files
-    rename_files(dataset_images_dir)
-    rename_files(dataset_descriptors_dir)
+    # rename_files(dataset_images_dir)
+    # rename_files(dataset_descriptors_dir)
 
     # Process dataset and target
-    # process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path)
-    # process_target(target_image_path, target_descriptor_save_dir, target_pickle_path)
-    # process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=10)
+    # Set variables
+    dataset_list = ["caltech101", "anime", "holiday"]
+    target_image_dir = "data/target_image"
+    target_descriptor_save_dir = "data/target_desc"
+    target_pickle_path = "data/target_df.pkl"
+    
+    for dataset in dataset_list:
+        if dataset != "holiday":
+            continue
+        dataset_images_dir = f"data/{dataset}_images"
+        dataset_descriptors_dir = f"data/{dataset}_desc"
+        dataset_pickle_path = f"data/{dataset}_df.pkl"
+        
+        if exists_dir_in_dir(dataset_images_dir):
+            process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=10)
+        else:
+            process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path)
+
+    process_target(target_image_dir, target_descriptor_save_dir, target_pickle_path)
 
     print("Finished!")
