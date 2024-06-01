@@ -29,6 +29,22 @@ def process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_
                     "--images_dir_path", dataset_images_dir,
                     "--save_df_path", dataset_pickle_path])
 
+def rename_dir(dataset_images_dir):
+    for dir in os.listdir(dataset_images_dir):
+        if os.path.isdir(os.path.join(dataset_images_dir, dir)):
+            new_dirname = dir.replace(" ", "_")
+            os.rename(os.path.join(dataset_images_dir, dir), os.path.join(dataset_images_dir, new_dirname))
+
+def rename_files(dataset_images_dir):
+    for dir in os.listdir(dataset_images_dir):
+        if os.path.isdir(os.path.join(dataset_images_dir, dir)):
+            for file in os.listdir(os.path.join(dataset_images_dir, dir)):
+                new_filename = file.replace(" ", "_")
+                os.rename(os.path.join(dataset_images_dir, dir, file), os.path.join(dataset_images_dir, dir, new_filename))
+        else:
+            new_filename = dir.replace(" ", "_")
+            os.rename(os.path.join(dataset_images_dir, dir), os.path.join(dataset_images_dir, new_filename))
+
 def process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=7):
     # Remove existing directories and files
     if os.path.exists(dataset_descriptors_dir):
@@ -92,7 +108,7 @@ def process_target(target_image_dir, target_descriptor_save_dir, target_pickle_p
 # Example usage
 if __name__ == "__main__":
     # Set variables
-    dataset = "caltech101"
+    dataset = "anime"
     dataset_images_dir = f"data/{dataset}_images"
     dataset_descriptors_dir = f"data/{dataset}_desc"
     dataset_pickle_path = f"data/{dataset}_df.pkl"
@@ -112,10 +128,14 @@ if __name__ == "__main__":
     shutil.move("hesaff", "..")
     subprocess.run(["make", "clean"])
     os.chdir("..")
+    
+    # Rename directories and files
+    rename_files(dataset_images_dir)
+    rename_files(dataset_descriptors_dir)
 
     # Process dataset and target
     # process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path)
     # process_target(target_image_path, target_descriptor_save_dir, target_pickle_path)
-    process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=40)
+    # process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=10)
 
     print("Finished!")
