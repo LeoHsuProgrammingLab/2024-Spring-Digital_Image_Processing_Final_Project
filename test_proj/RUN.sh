@@ -2,8 +2,8 @@ dataset_images_dir="data/holiday_images"
 dataset_descriptors_dir="data/holiday_descriptors" 
 dataset_pickle_path="data/holiday_df.pkl"
 
-target_image_path="data/01.png"
-target_descriptor_save_dir="data/"
+target_image_path="data/target_image/215100.jpg"
+target_descriptor_save_dir="data/target_desc"
 target_pickle_path="data/target_df.pkl"
 
 rm -rf hesaff
@@ -52,7 +52,7 @@ python3 get_dataset.py \
 # =========
 
 # generate descriptors for target
-./hesaff "$target_image_path" 20
+./hesaff "$target_image_path" 10
 
 mkdir image_dummy
 cp "$target_image_path" image_dummy
