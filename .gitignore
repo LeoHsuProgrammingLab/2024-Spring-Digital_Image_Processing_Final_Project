@@ -1,8 +1,10 @@
 __pycache__
 .DS_Store
-# test_proj
 holidays_desc_original
 INRIA*
 /test_proj/data/holiday*
 /test_proj/data/*.pkl
+/test_proj/output/*
+/test_proj/data/caltech*
+/test_proj/data/anime*
 *.sift

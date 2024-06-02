@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import os
+from tqdm.auto import tqdm
 
 def load_data_from_file(filename):
     keypoints = []
@@ -76,8 +77,22 @@ def main():
     save_dir = args.save_df_path
 
     # List and sort files in the directories
-    descriptors_path_lst = sorted(os.listdir(descriptors_dir))
-    images_path_lst = sorted(os.listdir(images_dir))
+    descriptors_path_lst = []
+    images_path_lst = []
+
+    for file in os.listdir(descriptors_dir):
+        if os.path.isdir(os.path.join(descriptors_dir, file)):
+            for f in os.listdir(os.path.join(descriptors_dir, file)):
+                if f.endswith(".hesaff.sift"):
+                    desc_path = os.path.join(file, f)
+                    descriptors_path_lst.append(desc_path)
+                    images_path_lst.append(desc_path[:-12])
+        elif file.endswith(".hesaff.sift"):
+            descriptors_path_lst.append(file)
+            images_path_lst.append(file[:-12])
+
+        print(descriptors_path_lst[-1])
+        print(images_path_lst[-1])
 
     # Initialize lists to store data for all images
     image_names = []
@@ -94,7 +109,7 @@ def main():
     descriptors_list = []
 
     # Process all descriptor files
-    for i in range(len(descriptors_path_lst)):
+    for i in tqdm(range(len(descriptors_path_lst))):
         path = os.path.join(descriptors_dir, descriptors_path_lst[i])
         keypoints, descriptors = load_data_from_file(path)
         
