@@ -140,17 +140,17 @@ if __name__ == "__main__":
     target_descriptor_save_dir = "data/target_desc"
     target_pickle_path = "data/target_df.pkl"
     
-    for dataset in dataset_list:
-        if dataset != "holiday":
-            continue
-        dataset_images_dir = f"data/{dataset}_images"
-        dataset_descriptors_dir = f"data/{dataset}_desc"
-        dataset_pickle_path = f"data/{dataset}_df.pkl"
+    # for dataset in dataset_list:
+    #     if dataset != "holiday":
+    #         continue
+    #     dataset_images_dir = f"data/{dataset}_images"
+    #     dataset_descriptors_dir = f"data/{dataset}_desc"
+    #     dataset_pickle_path = f"data/{dataset}_df.pkl"
         
-        if exists_dir_in_dir(dataset_images_dir):
-            process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=10)
-        else:
-            process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path)
+    #     if exists_dir_in_dir(dataset_images_dir):
+    #         process_dataset_with_dir(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path, max_num_each_dir=10)
+    #     else:
+    #         process_dataset(dataset_images_dir, dataset_descriptors_dir, dataset_pickle_path)
 
     process_target(target_image_dir, target_descriptor_save_dir, target_pickle_path)
 
