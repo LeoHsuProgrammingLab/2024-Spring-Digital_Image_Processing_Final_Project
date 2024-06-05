@@ -1,6 +1,6 @@
 # Digital Image Processing Project
 
-{Place the intro of the project here}
+This is an implementation of the paper "Reconstructing an Image from Its Local Descriptors" by Philippe Weinzaepfel, Hervé Jégou, and Patrick Pérez, presented at CVPR 2011. It serves as the term project for group 7 in the CSIE5612 (Digital Image Processing) course at National Taiwan University.
 
 ## Prerequisites
 
@@ -83,7 +83,3 @@ For more detailed documentation, code, and the progress we made during the proje
 git clone https://github.com/LeoHsuProgrammingLab/2024-Spring-Digital_Image_Processing_Final_Project.git
 git checkout dev
 ```
-
-## References
-
-{insert some references}
